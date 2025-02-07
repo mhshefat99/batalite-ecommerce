@@ -8,7 +8,7 @@ const BASE_URL = import.meta.env.VITE_BATALITE_BASE_URL;
 
 const getProducts = async function (filters) {
   // Destructuring filters ---------------------
-  const { search, category, limit, minPrice, maxPrice, colors, sortBy } =
+  const { search, category, limit, minPrice, maxPrice, colors, sortBy, page } =
     filters;
 
   // First get queryParams from the url , initially queryParams is = null ------------
@@ -22,6 +22,7 @@ const getProducts = async function (filters) {
   if (minPrice) queryParams.append("price_gte", minPrice);
   if (maxPrice) queryParams.append("price_lte", maxPrice);
   if (limit) queryParams.append("_limit", limit);
+  if (page) queryParams.append("_page", page);
   // if (colors && colors.length > 0)
   //   queryParams.append("colors", colors.join(","));
 
@@ -39,7 +40,9 @@ const getProducts = async function (filters) {
   // }
 
   const response = await axios.get(url);
-  return response.data;
+  const products = response.data;
+  const totalResults = response.headers["x-total-count"];
+  return { products, totalResults };
 };
 
 const getProductDetails = async function (id) {
@@ -49,8 +52,8 @@ const getProductDetails = async function (id) {
 };
 
 const getCategoricalProducts = async function (filters = {}) {
-  const { search, category, sortBy, minPrice, maxPrice } = filters;
-  await console.log(category === "men");
+  const { search, category, sortBy, minPrice, maxPrice, limit, page } = filters;
+  // console.log(category === "men");
 
   const queryParams = new URLSearchParams();
   if (category === "men" || category === "women" || category === "kids") {
@@ -64,13 +67,17 @@ const getCategoricalProducts = async function (filters = {}) {
   if (sortBy) queryParams.append("sortBy", sortBy);
   if (minPrice) queryParams.append("price_gte", minPrice);
   if (maxPrice) queryParams.append("price_lte", maxPrice);
+  if (limit) queryParams.append("_limit", limit);
+  if (page) queryParams.append("_page", page);
 
   const url = `${BASE_URL}?${queryParams.toString()}`;
   console.log(url); // For debugging; consider removing or replacing for production
 
   try {
     const response = await axios.get(url);
-    return response.data;
+    const products = response.data;
+    const totalResults = response.headers["x-total-count"];
+    return { products, totalResults };
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error; // Re-throw the error to handle it where this function is called

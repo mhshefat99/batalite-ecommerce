@@ -25,7 +25,7 @@ function ProductOverview() {
     getItemById(store, parseInt(productId))
   );
 
-  const { data: products } = useProducts({ limit: 5 });
+  const { products } = useProducts({ limit: 5 });
 
   const {
     data: product,

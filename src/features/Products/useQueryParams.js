@@ -13,6 +13,7 @@ const useQueryParams = function useQueryParams() {
   const sortBy = searchParams.get("sortBy") || "";
   const minPrice = searchParams.get("minPrice") || "";
   const maxPrice = searchParams.get("maxPrice") || "";
+  const page = Number(searchParams.get("page")) || 1;
 
   // Suppose url format is : host/endpoint?color:red&color:blue :
   //   const colors = searchParams.getAll("color") || [];
@@ -60,6 +61,11 @@ const useQueryParams = function useQueryParams() {
     setSearchParams(searchParams);
   };
 
+  const setPage = function (pageNum) {
+    searchParams.set("page", pageNum);
+    setSearchParams(searchParams);
+  };
+
   // returning search params --------------------------
   return {
     search,
@@ -68,9 +74,11 @@ const useQueryParams = function useQueryParams() {
     minPrice,
     maxPrice,
     colors,
+    page,
     setQueryParams,
     setColors,
     setPrice,
+    setPage,
   };
 };
 

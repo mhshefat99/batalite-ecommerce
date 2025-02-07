@@ -5,13 +5,19 @@ import ProductCard from "@/features/Products/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import Breadcrumb from "@/components/Breadcrumb";
 import useCategoricalProducts from "@/features/Products/useCategoricalProducts";
-import Grid from "@/components/Grid";
 import priceFilterItems from "@/data/priceFilterItem";
+import useQueryParams from "@/features/Products/useQueryParams";
+import Pagination from "@/features/Products/Pagination";
 import { useParams } from "react-router-dom";
+import Grid from "@/components/Grid";
+
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
+const limit = 12;
+
 function CategoricalCollections() {
+  const { page, setPage } = useQueryParams();
   let { categoryName } = useParams();
   const capitalizeCategoryName = categoryName
     .replace(/-/g, " ")
@@ -30,7 +36,11 @@ function CategoricalCollections() {
       ?.replace(/\bwomens\b/, "women");
   }
 
-  const { data, isLoading, error } = useCategoricalProducts({ categoryName });
+  const { products, totalResults, isLoading, error } = useCategoricalProducts({
+    categoryName,
+    limit,
+  });
+  console.log(Math.ceil(totalResults / limit));
   return (
     <div className="px-4 bg-white">
       <MaxWidthWrapper>
@@ -57,23 +67,33 @@ function CategoricalCollections() {
             {error && <p>Error: {error.message || "Something went wrong"}</p>}
             {!isLoading &&
               !error &&
-              Array.isArray(data) &&
-              data.length === 0 && <p>No product found</p>}
-            {!isLoading && !error && Array.isArray(data) && data.length > 0 && (
-              <div>
-                <h2 className="text-xl font-bold text-gray-700">
-                  {capitalizeCategoryName}
-                </h2>
-                <p>{`${data.length} items`}</p>
-                <div>Top</div>
-                <Grid
-                  data={data}
-                  render={(product, index) => (
-                    <ProductCard product={product} key={index} />
-                  )}
-                />
-              </div>
-            )}
+              Array.isArray(products) &&
+              products.length === 0 && <p>No product found</p>}
+            {!isLoading &&
+              !error &&
+              Array.isArray(products) &&
+              products.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-bold text-gray-700">
+                    {capitalizeCategoryName}
+                  </h2>
+                  <p>{`${totalResults} items`}</p>
+                  <div>Top</div>
+                  <Grid
+                    data={products}
+                    render={(product, index) => (
+                      <ProductCard product={product} key={index} />
+                    )}
+                  />
+                </div>
+              )}
+            <Pagination
+              activePage={page}
+              totalPages={Math.ceil(totalResults / limit)}
+              handlePrevious={() => setPage(Math.max(page - 1, 1))}
+              handlePageNumClick={setPage}
+              handleNext={() => setPage(Math.min(page + 1, totalResults))}
+            />
           </div>
         </section>
       </MaxWidthWrapper>
